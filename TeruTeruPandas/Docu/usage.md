@@ -27,13 +27,13 @@ Console.WriteLine(df.Head(2));
 ## Core Objects
 ### DataFrame
 - Create: `new DataFrame(Dictionary<string, IColumn> columns, Index? index = null)`
-- Properties: `RowCount`, `ColumnCount`, `Columns`, `Index`, `Values`, `Dtypes`
+- Properties: `RowCount`, `ColumnCount`, `Columns`, `Index`, `Values`, `Dtypes`, `Size`, `Empty`
 - Indexers:
   - `df["col"]`: column access
-  - `df[row, "col"]`: row/column access
+  - `df[row, "col"]`: row/column access (position-based)
   - `df[rowKey, "col"]`: label-based access
   - `df[mask]`: BoolSeries filtering
-- Common methods: `Head`, `Tail`, `DropNA`, `Info`, `Describe`, `IsNa`, `NotNa`
+- Common methods: `Head`, `Tail`, `DropNA`, `FillNA`, `SortValues`, `SortIndex`, `Info`, `Describe`, `IsNa`, `NotNa`
 - Stats: `Std`, `Var`, `Median`, `Min`, `Max`, `Quantile`
 - Cumulative/change: `Cumsum`, `Cumprod`, `Cummax`, `Cummin`, `Diff`, `PctChange`
 
@@ -42,7 +42,7 @@ Console.WriteLine(df.Head(2));
 - `BoolSeries`: boolean mask with `&`, `|`, `!`
 
 ### Index
-- `RangeIndex`, `IntIndex`, `StringIndex`, `DateTimeIndex`
+- `RangeIndex`, `IntIndex`, `StringIndex`, `DateTimeIndex`, `MultiIndex`
 - DataFrame/Series supports position and label-based access via Index.
 
 ## Indexing
@@ -52,8 +52,8 @@ Console.WriteLine(df.Head(2));
 
 ## NA Handling
 - Columns keep NA masks.
-- `DropNA()` removes rows with NA values.
-- `FillNa(value)` (Compat) fills NA with a constant.
+- `DropNA(how="any|all", thresh=null)` removes rows with NA values.
+- `FillNA(value)` or `FillNA(method="ffill|bfill")` fills NA values.
 
 ## Grouping and Aggregation
 - `df.GroupBy("col").Agg(new Dictionary<string, string[]>{ ... })`
@@ -79,6 +79,7 @@ Console.WriteLine(df.Head(2));
 
 ### SQLite
 - Read: `SqliteIO.ReadSqlite(connectionString, query)`
+- Read specific table: `SqliteIO.ReadSqliteTable(dbPath, tableName)`
 - Write: `SqliteIO.ToSqlite(df, connectionString, tableName, ifExists: false)`
 - Table list: `SqliteIO.GetTableNames(dbPath)`
 
@@ -88,9 +89,9 @@ Console.WriteLine(df.Head(2));
 - Persist to JSON, directory (CSV), or SQLite
 
 ## SQL
-- `universe.SqlExecute("SELECT ... FROM ... WHERE ...")`
-- Supported: `SELECT`, `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`, `LIMIT`
-- Note: `ORDER BY` is currently a no-op (keeps original order).
+- `universe.SqlExecute("SELECT ... FROM ... WHERE ... GROUP BY ... ORDER BY ... LIMIT ...")`
+- Supported: `SELECT`, `WHERE`, `JOIN` (INNER/LEFT/RIGHT), `GROUP BY`, `ORDER BY` (ASC/DESC), `LIMIT`
+- Note: `ORDER BY` performs actual sorting.
 
 ## Limitations
 - Type inference is sample-based and favors string/number/bool.

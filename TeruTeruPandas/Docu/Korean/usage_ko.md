@@ -27,13 +27,13 @@ Console.WriteLine(df.Head(2));
 ## 핵심 객체
 ### DataFrame
 - 생성: `new DataFrame(Dictionary<string, IColumn> columns, Index? index = null)`
-- 속성: `RowCount`, `ColumnCount`, `Columns`, `Index`, `Values`, `Dtypes`
+- 속성: `RowCount`, `ColumnCount`, `Columns`, `Index`, `Values`, `Dtypes`, `Size`, `Empty`
 - 인덱서:
   - `df["col"]`: 컬럼 접근
-  - `df[row, "col"]`: 행/컬럼 접근
+  - `df[row, "col"]`: 행/컬럼 접근 (위치 기반)
   - `df[rowKey, "col"]`: 라벨 기반 접근
   - `df[mask]`: BoolSeries 필터링
-- 주요 메서드: `Head`, `Tail`, `DropNA`, `Info`, `Describe`, `IsNa`, `NotNa`
+- 주요 메서드: `Head`, `Tail`, `DropNA`, `FillNA`, `SortValues`, `SortIndex`, `Info`, `Describe`, `IsNa`, `NotNa`
 - 통계: `Std`, `Var`, `Median`, `Min`, `Max`, `Quantile`
 - 누적/변화: `Cumsum`, `Cumprod`, `Cummax`, `Cummin`, `Diff`, `PctChange`
 
@@ -42,7 +42,7 @@ Console.WriteLine(df.Head(2));
 - `BoolSeries`: 불리언 마스크, `&`, `|`, `!` 지원
 
 ### Index
-- `RangeIndex`, `IntIndex`, `StringIndex`, `DateTimeIndex`
+- `RangeIndex`, `IntIndex`, `StringIndex`, `DateTimeIndex`, `MultiIndex`
 - DataFrame/Series는 위치 및 라벨 기반 접근을 Index로 지원
 
 ## 인덱싱
@@ -52,8 +52,8 @@ Console.WriteLine(df.Head(2));
 
 ## NA 처리
 - 컬럼은 NA 마스크를 유지
-- `DropNA()`로 NA가 포함된 행 제거
-- `FillNa(value)`(Compat)로 NA를 상수로 채움
+- `DropNA(how="any|all", thresh=null)`로 NA가 포함된 행 제거
+- `FillNA(value)` 또는 `FillNA(method="ffill|bfill")`로 NA를 채움
 
 ## 그룹화 및 집계
 - `df.GroupBy("col").Agg(new Dictionary<string, string[]>{ ... })`
@@ -79,6 +79,7 @@ Console.WriteLine(df.Head(2));
 
 ### SQLite
 - 읽기: `SqliteIO.ReadSqlite(connectionString, query)`
+- 특정 테이블 읽기: `SqliteIO.ReadSqliteTable(dbPath, tableName)`
 - 쓰기: `SqliteIO.ToSqlite(df, connectionString, tableName, ifExists: false)`
 - 테이블 목록: `SqliteIO.GetTableNames(dbPath)`
 
@@ -88,9 +89,9 @@ Console.WriteLine(df.Head(2));
 - 전체를 JSON, 디렉터리(CSV), SQLite로 저장/복원 가능
 
 ## SQL 지원
-- `universe.SqlExecute("SELECT ... FROM ... WHERE ...")`
-- 지원: `SELECT`, `WHERE`, `JOIN`, `GROUP BY`, `ORDER BY`, `LIMIT`
-- 참고: `ORDER BY`는 현재 정렬 없이 원본 순서 유지
+- `universe.SqlExecute("SELECT ... FROM ... WHERE ... GROUP BY ... ORDER BY ... LIMIT ...")`
+- 지원: `SELECT`, `WHERE`, `JOIN` (INNER/LEFT/RIGHT), `GROUP BY`, `ORDER BY` (ASC/DESC), `LIMIT`
+- 참고: `ORDER BY`는 실제 정렬을 수행합니다.
 
 ## 제한사항
 - 타입 추론은 샘플 기반이며 string/number/bool 위주로 동작
